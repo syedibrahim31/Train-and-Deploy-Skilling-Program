@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Typing Skill Assessment</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+   body {
+     background-color: #f4f6f9;
+   }
+   .card {
+     max-width: 700px;
+     margin: 40px auto;
+   }
+   textarea {
+     resize: none;
+   }
+   .summary-box p {
+     margin-bottom: 5px;
+     font-weight: 500;
+   }
+</style>
+</head>
+<body>
+<div class="card shadow p-4">
+<h4 class="mb-3">Typing Skill Assessment</h4>
+<p><strong>Clock:</strong> <span id="clock"></span></p>
+<p><strong>Timer:</strong> <span id="timer">00:00:00</span></p>
+<textarea id="typingArea" class="form-control mb-3" rows="6" placeholder="Start typing here..."></textarea>
+<div class="summary-box">
+<h5>Summary</h5>
+<p>Words Typed Per Second: <span id="wps">0</span></p>
+<p>Chars Typed Per Second: <span id="cps">0</span></p>
+<p>Sentences Typed Per Second: <span id="sps">0</span></p>
+</div>
+<button id="resetBtn" class="btn btn-danger mt-3">RESET</button>
+</div>
+<script>
+ const typingArea = document.getElementById("typingArea");
+ const timerDisplay = document.getElementById("timer");
+ const clockDisplay = document.getElementById("clock");
+ const wpsDisplay = document.getElementById("wps");
+ const cpsDisplay = document.getElementById("cps");
+ const spsDisplay = document.getElementById("sps");
+ const resetBtn = document.getElementById("resetBtn");
+ let startTime = null;
+ let timerInterval = null;
+ let running = false;
+ // Live clock
+ function updateClock() {
+   const now = new Date();
+   clockDisplay.textContent = now.toLocaleTimeString();
+ }
+ setInterval(updateClock, 1000);
+ updateClock();
+ function startTimer() {
+   if (running) return;
+   running = true;
+   startTime = Date.now();
+   timerInterval = setInterval(() => {
+     const elapsed = Date.now() - startTime;
+     const seconds = Math.floor(elapsed / 1000);
+     const hrs = String(Math.floor(seconds / 3600)).padStart(2, "0");
+     const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+     const secs = String(seconds % 60).padStart(2, "0");
+     timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
+     calculateStats(seconds);
+   }, 1000);
+ }
+ function stopTimer() {
+   running = false;
+   clearInterval(timerInterval);
+ }
+ function calculateStats(seconds) {
+   if (seconds === 0) return;
+   const text = typingArea.value.trim();
+   const chars = text.length;
+   const words = text.length > 0 ? text.split(/\s+/).length : 0;
+   const sentences = text.length > 0 ? text.split(/[.!?]+/).filter(s => s.trim().length > 0).length : 0;
+   wpsDisplay.textContent = (words / seconds).toFixed(2);
+   cpsDisplay.textContent = (chars / seconds).toFixed(2);
+   spsDisplay.textContent = (sentences / seconds).toFixed(2);
+ }
+ typingArea.addEventListener("focus", startTimer);
+ typingArea.addEventListener("blur", stopTimer);
+ resetBtn.addEventListener("click", () => {
+   stopTimer();
+   typingArea.value = "";
+   timerDisplay.textContent = "00:00:00";
+   wpsDisplay.textContent = "0";
+   cpsDisplay.textContent = "0";
+   spsDisplay.textContent = "0";
+   startTime = null;
+ });
+</script>
+</body>
+</html>
